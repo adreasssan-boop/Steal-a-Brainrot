@@ -1,4 +1,4 @@
--- RAGE MOD Ultra Lite
+-- RAGE MOD Anti-Cheat Bypass
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local LP = Players.LocalPlayer
@@ -26,7 +26,41 @@ local ESPOn = false
 local NoclipOn = false
 local ESPCache = {}
 
--- Функция ESP (оптимизированная)
+-- Улучшенный Noclip с обходом античита
+local function AdvancedNoclip()
+    if not NoclipOn or not LP.Character then return end
+    
+    local character = LP.Character
+    local humanoid = character:FindFirstChildOfClass("Humanoid")
+    
+    if humanoid then
+        -- Отключаем физику коллизии
+        for _, part in pairs(character:GetDescendants()) do
+            if part:IsA("BasePart") then
+                part.CanCollide = false
+                part.Velocity = Vector3.new(0, 0, 0)
+                part.RotVelocity = Vector3.new(0, 0, 0)
+            end
+        end
+        
+        -- Обход античита: временно меняем тип коллизии
+        if character:FindFirstChild("HumanoidRootPart") then
+            local root = character.HumanoidRootPart
+            root.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
+            root.AssemblyAngularVelocity = Vector3.new(0, 0, 0)
+        end
+    end
+end
+
+-- Агрессивный Noclip цикл
+local function NoclipLoop()
+    while NoclipOn do
+        AdvancedNoclip()
+        RunService.Heartbeat:Wait()
+    end
+end
+
+-- Функция ESP
 local function SimpleESP()
     for _, player in pairs(Players:GetPlayers()) do
         if player ~= LP and not ESPCache[player] then
@@ -37,11 +71,9 @@ local function SimpleESP()
                 
                 local char = player.Character
                 local root = char:FindFirstChild("HumanoidRootPart")
-                local hum = char:FindFirstChild("Humanoid")
                 
-                if not root or not hum then return end
+                if not root then return end
                 
-                -- Минимальный Highlight
                 local hl = Instance.new("Highlight")
                 hl.Name = "RAGE_HL"
                 hl.Parent = char
@@ -50,9 +82,10 @@ local function SimpleESP()
                 hl.OutlineColor = Color3.new(1, 1, 1)
                 hl.FillTransparency = 0.9
                 
-                -- Обновление
-                RunService.Heartbeat:Connect(function()
+                local conn
+                conn = RunService.Heartbeat:Connect(function()
                     if not char or not char.Parent then
+                        conn:Disconnect()
                         hl:Destroy()
                         return
                     end
@@ -64,17 +97,6 @@ local function SimpleESP()
                 setup()
             end
             player.CharacterAdded:Connect(setup)
-        end
-    end
-end
-
--- Noclip функция
-local function NoclipLoop()
-    if NoclipOn and LP.Character then
-        for _, part in pairs(LP.Character:GetDescendants()) do
-            if part:IsA("BasePart") then
-                part.CanCollide = false
-            end
         end
     end
 end
@@ -106,9 +128,26 @@ NoclipBtn.Text = "NOCLIP: OFF"
 NoclipBtn.Parent = Main
 yPos = yPos + 30
 
+local NoclipThread
+
 NoclipBtn.MouseButton1Click:Connect(function()
     NoclipOn = not NoclipOn
     NoclipBtn.Text = "NOCLIP: " .. (NoclipOn and "ON" or "OFF")
+    
+    if NoclipOn then
+        -- Запускаем агрессивный noclip
+        NoclipThread = coroutine.create(NoclipLoop)
+        coroutine.resume(NoclipThread)
+    else
+        -- Восстанавливаем коллизию
+        if LP.Character then
+            for _, part in pairs(LP.Character:GetDescendants()) do
+                if part:IsA("BasePart") then
+                    part.CanCollide = true
+                end
+            end
+        end
+    end
 end)
 
 local CloseBtn = Instance.new("TextButton")
@@ -120,12 +159,10 @@ CloseBtn.Text = "CLOSE"
 CloseBtn.Parent = Main
 
 CloseBtn.MouseButton1Click:Connect(function()
+    NoclipOn = false
     GUI:Destroy()
 end)
 
--- Запуск циклов
-RunService.Stepped:Connect(NoclipLoop)
-
 -- Инициализация ESP
-wait(1)
+wait(2)
 SimpleESP()
