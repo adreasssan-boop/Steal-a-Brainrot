@@ -1,4 +1,4 @@
--- RAGE MOD Advanced
+-- RAGE MOD Premium UI
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local UIS = game:GetService("UserInputService")
@@ -13,38 +13,123 @@ local ESPCache = {}
 local Flying = false
 local FlySpeed = 50
 
--- Кнопка открытия меню
-local OpenBtn = Instance.new("TextButton")
-OpenBtn.Size = UDim2.new(0, 40, 0, 40)
-OpenBtn.Position = UDim2.new(0, 10, 0.5, -20)
-OpenBtn.BackgroundColor3 = Color3.new(1, 0.84, 0)
-OpenBtn.TextColor3 = Color3.new(0, 0, 0)
-OpenBtn.Text = "☰"
-OpenBtn.TextSize = 20
-OpenBtn.ZIndex = 10
-OpenBtn.Parent = game.CoreGui
-
--- Основное меню
+-- Создание красивого GUI
 local GUI = Instance.new("ScreenGui")
+GUI.Name = "RAGE_MOD_UI"
 GUI.Parent = game.CoreGui
 
+-- Основное меню
 local Main = Instance.new("Frame")
-Main.Size = UDim2.new(0, 220, 0, 200)
-Main.Position = UDim2.new(0, 60, 0, 10)
-Main.BackgroundColor3 = Color3.new(0.1, 0.1, 0)
-Main.BorderColor3 = Color3.new(1, 0.84, 0)
+Main.Size = UDim2.new(0, 250, 0, 300)
+Main.Position = UDim2.new(0.5, -125, 0.5, -150)
+Main.BackgroundColor3 = Color3.fromRGB(20, 20, 10)
+Main.BorderSizePixel = 0
 Main.Visible = false
 Main.Active = true
 Main.Draggable = true
 Main.Parent = GUI
 
+-- Тень
+local Shadow = Instance.new("ImageLabel")
+Shadow.Size = UDim2.new(1, 10, 1, 10)
+Shadow.Position = UDim2.new(0, -5, 0, -5)
+Shadow.BackgroundTransparency = 1
+Shadow.Image = "rbxassetid://5554237731"
+Shadow.ImageColor3 = Color3.fromRGB(0, 0, 0)
+Shadow.ScaleType = Enum.ScaleType.Slice
+Shadow.SliceCenter = Rect.new(10, 10, 118, 118)
+Shadow.Parent = Main
+
+-- Заголовок
+local TitleBar = Instance.new("Frame")
+TitleBar.Size = UDim2.new(1, 0, 0, 35)
+TitleBar.BackgroundColor3 = Color3.fromRGB(255, 215, 0)
+TitleBar.BorderSizePixel = 0
+TitleBar.Parent = Main
+
 local Title = Instance.new("TextLabel")
-Title.Size = UDim2.new(1, 0, 0, 25)
-Title.BackgroundColor3 = Color3.new(1, 0.84, 0)
-Title.TextColor3 = Color3.new(0, 0, 0)
-Title.Text = "RAGE MOD - Перетащи"
-Title.TextSize = 14
-Title.Parent = Main
+Title.Size = UDim2.new(1, -40, 1, 0)
+Title.BackgroundTransparency = 1
+Title.TextColor3 = Color3.fromRGB(0, 0, 0)
+Title.Text = "RAGE MOD v1.01"
+Title.TextSize = 16
+Title.Font = Enum.Font.GothamBold
+Title.TextXAlignment = Enum.TextXAlignment.Left
+Title.Position = UDim2.new(0, 10, 0, 0)
+Title.Parent = TitleBar
+
+local CloseBtn = Instance.new("TextButton")
+CloseBtn.Size = UDim2.new(0, 25, 0, 25)
+CloseBtn.Position = UDim2.new(1, -30, 0, 5)
+CloseBtn.BackgroundColor3 = Color3.fromRGB(220, 0, 0)
+CloseBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+CloseBtn.Text = "×"
+CloseBtn.TextSize = 18
+CloseBtn.Font = Enum.Font.GothamBold
+CloseBtn.Parent = TitleBar
+
+-- Контейнер для кнопок
+local ButtonContainer = Instance.new("Frame")
+ButtonContainer.Size = UDim2.new(1, -20, 1, -50)
+ButtonContainer.Position = UDim2.new(0, 10, 0, 40)
+ButtonContainer.BackgroundTransparency = 1
+ButtonContainer.Parent = Main
+
+-- Стилизованная кнопка
+local function CreateStyledButton(yPos, text)
+    local buttonFrame = Instance.new("Frame")
+    buttonFrame.Size = UDim2.new(1, 0, 0, 40)
+    buttonFrame.Position = UDim2.new(0, 0, 0, yPos)
+    buttonFrame.BackgroundTransparency = 1
+    buttonFrame.Parent = ButtonContainer
+    
+    local button = Instance.new("TextButton")
+    button.Size = UDim2.new(1, 0, 1, 0)
+    button.BackgroundColor3 = Color3.fromRGB(40, 40, 20)
+    button.BorderSizePixel = 0
+    button.Text = ""
+    button.Parent = buttonFrame
+    
+    local buttonShadow = Instance.new("Frame")
+    buttonShadow.Size = UDim2.new(1, 4, 1, 4)
+    buttonShadow.Position = UDim2.new(0, -2, 0, -2)
+    buttonShadow.BackgroundColor3 = Color3.fromRGB(255, 215, 0)
+    buttonShadow.BorderSizePixel = 0
+    buttonShadow.ZIndex = 0
+    buttonShadow.Parent = buttonFrame
+    
+    local buttonText = Instance.new("TextLabel")
+    buttonText.Size = UDim2.new(1, -20, 1, 0)
+    buttonText.Position = UDim2.new(0, 10, 0, 0)
+    buttonText.BackgroundTransparency = 1
+    buttonText.TextColor3 = Color3.fromRGB(255, 255, 255)
+    buttonText.Text = text
+    buttonText.TextSize = 14
+    buttonText.Font = Enum.Font.Gotham
+    buttonText.TextXAlignment = Enum.TextXAlignment.Left
+    buttonText.Parent = button
+    
+    local statusText = Instance.new("TextLabel")
+    statusText.Size = UDim2.new(0, 40, 1, 0)
+    statusText.Position = UDim2.new(1, -45, 0, 0)
+    statusText.BackgroundTransparency = 1
+    statusText.TextColor3 = Color3.fromRGB(255, 50, 50)
+    statusText.Text = "OFF"
+    statusText.TextSize = 12
+    statusText.Font = Enum.Font.GothamBold
+    statusText.Parent = button
+    
+    -- Анимация наведения
+    button.MouseEnter:Connect(function()
+        game:GetService("TweenService"):Create(button, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(50, 50, 25)}):Play()
+    end)
+    
+    button.MouseLeave:Connect(function()
+        game:GetService("TweenService"):Create(button, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(40, 40, 20)}):Play()
+    end)
+    
+    return button, statusText
+end
 
 -- Функция Fly
 local function StartFlying()
@@ -135,8 +220,8 @@ local function SimpleESP()
                 hl.Name = "RAGE_HL"
                 hl.Parent = char
                 hl.Enabled = ESPOn
-                hl.FillColor = Color3.new(1, 1, 1)
-                hl.OutlineColor = Color3.new(1, 1, 1)
+                hl.FillColor = Color3.fromRGB(255, 255, 255)
+                hl.OutlineColor = Color3.fromRGB(255, 255, 255)
                 hl.FillTransparency = 0.9
                 
                 local conn
@@ -161,43 +246,41 @@ local function SimpleESP()
     end
 end
 
--- Создание кнопок в меню
-local yPos = 30
+-- Создание кнопок
+local buttons = {}
+local statusLabels = {}
 
-local function CreateButton(text)
-    local btn = Instance.new("TextButton")
-    btn.Size = UDim2.new(0.9, 0, 0, 25)
-    btn.Position = UDim2.new(0.05, 0, 0, yPos)
-    btn.BackgroundColor3 = Color3.new(1, 0.84, 0)
-    btn.TextColor3 = Color3.new(0, 0, 0)
-    btn.Text = text
-    btn.TextSize = 12
-    btn.Parent = Main
-    yPos = yPos + 30
-    return btn
+local buttonConfigs = {
+    "Player ESP",
+    "Noclip",
+    "Fly Mode",
+    "Speed Hack"
+}
+
+for i, config in ipairs(buttonConfigs) do
+    local button, status = CreateStyledButton((i-1) * 45, config)
+    buttons[config] = button
+    statusLabels[config] = status
 end
 
--- Кнопки
-local ESPBtn = CreateButton("ESP: OFF")
-local NoclipBtn = CreateButton("NOCLIP: OFF")
-local FlyBtn = CreateButton("FLY: OFF")
-local CloseMenuBtn = CreateButton("ЗАКРЫТЬ МЕНЮ")
-
 -- Обработчики кнопок
-ESPBtn.MouseButton1Click:Connect(function()
+buttons["Player ESP"].MouseButton1Click:Connect(function()
     ESPOn = not ESPOn
-    ESPBtn.Text = "ESP: " .. (ESPOn and "ON" or "OFF")
+    statusLabels["Player ESP"].Text = ESPOn and "ON" or "OFF"
+    statusLabels["Player ESP"].TextColor3 = ESPOn and Color3.fromRGB(50, 255, 50) or Color3.fromRGB(255, 50, 50)
     SimpleESP()
 end)
 
-NoclipBtn.MouseButton1Click:Connect(function()
+buttons["Noclip"].MouseButton1Click:Connect(function()
     NoclipOn = not NoclipOn
-    NoclipBtn.Text = "NOCLIP: " .. (NoclipOn and "ON" or "OFF")
+    statusLabels["Noclip"].Text = NoclipOn and "ON" or "OFF"
+    statusLabels["Noclip"].TextColor3 = NoclipOn and Color3.fromRGB(50, 255, 50) or Color3.fromRGB(255, 50, 50)
 end)
 
-FlyBtn.MouseButton1Click:Connect(function()
+buttons["Fly Mode"].MouseButton1Click:Connect(function()
     FlyOn = not FlyOn
-    FlyBtn.Text = "FLY: " .. (FlyOn and "ON" or "OFF")
+    statusLabels["Fly Mode"].Text = FlyOn and "ON" or "OFF"
+    statusLabels["Fly Mode"].TextColor3 = FlyOn and Color3.fromRGB(50, 255, 50) or Color3.fromRGB(255, 50, 50)
     
     if FlyOn then
         StartFlying()
@@ -206,27 +289,37 @@ FlyBtn.MouseButton1Click:Connect(function()
     end
 end)
 
-CloseMenuBtn.MouseButton1Click:Connect(function()
-    MenuOpen = false
-    Main.Visible = false
-    OpenBtn.Visible = true
+buttons["Speed Hack"].MouseButton1Click:Connect(function()
+    -- Заглушка для будущей функции
 end)
 
--- Кнопка открытия меню
-OpenBtn.MouseButton1Click:Connect(function()
-    MenuOpen = not MenuOpen
-    Main.Visible = MenuOpen
-    OpenBtn.Visible = not MenuOpen
+-- Управление меню
+CloseBtn.MouseButton1Click:Connect(function()
+    MenuOpen = false
+    Main.Visible = false
+end)
+
+-- Открытие/закрытие на Insert
+UIS.InputBegan:Connect(function(input, gameProcessed)
+    if gameProcessed then return end
+    
+    if input.KeyCode == Enum.KeyCode.Insert then
+        MenuOpen = not MenuOpen
+        Main.Visible = MenuOpen
+    end
 end)
 
 -- Циклы
 RunService.Stepped:Connect(AdvancedNoclip)
 
+-- Информация в консоль
+print("RAGE MOD loaded! Press INSERT to open menu")
+
 -- Инициализация
 wait(2)
 SimpleESP()
 
--- Авто-обновление ESP при новых игроках
+-- Авто-обновление ESP
 Players.PlayerAdded:Connect(function(player)
     wait(2)
     SimpleESP()
